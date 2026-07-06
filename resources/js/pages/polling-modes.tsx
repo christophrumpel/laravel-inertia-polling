@@ -20,8 +20,9 @@ export default function PollingModes({
     const [showOptions, setShowOptions] = useState(false);
     const { telemetry, reset: resetTelemetry } = useTelemetry();
 
-    // Re-fetch the page every second so the UI keeps up with the server.
-    usePoll(1000);
+    // Poll every second, but only re-fetch the `deployment` prop — a
+    // smaller, cheaper partial request each tick.
+    usePoll(1000, { only: ['deployment'] });
 
     const changeMode = (value: Mode) => {
         setMode(value);
