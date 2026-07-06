@@ -1,4 +1,4 @@
-import { Head, router, usePoll } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     reset,
@@ -6,6 +6,7 @@ import {
 } from '@/actions/App/Http/Controllers/DeploymentController';
 import { DeploymentCard } from '@/components/deployment-card';
 import { PollingOptions } from '@/components/polling-options';
+import { StatusPoller } from '@/components/status-poller';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { polling } from '@/routes';
 import type { Deployment, Mode } from '@/types/deployment';
@@ -18,11 +19,7 @@ export default function PollingModes({
     const [mode, setMode] = useState<Mode>('overlap');
     const [keepAlive, setKeepAlive] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
-    const { telemetry, reset: resetTelemetry } = useTelemetry();
-
-    // Poll every second, but only re-fetch the `deployment` prop — a
-    // smaller, cheaper partial request each tick.
-    usePoll(1000, { only: ['deployment'] });
+    const { telemetry, track, reset: resetTelemetry } = useTelemetry();
 
     const changeMode = (value: Mode) => {
         setMode(value);
@@ -62,6 +59,15 @@ export default function PollingModes({
                     onReset={resetDeploy}
                 />
             </div>
+
+            {/* Keyed so a mode change re-initialises the poll cleanly */}
+            <StatusPoller
+                key={`${mode}-${keepAlive}`}
+                mode={mode}
+                keepAlive={keepAlive}
+                enabled={deployment.hasStarted && !deployment.isComplete}
+                onEvent={track}
+            />
         </>
     );
 }
