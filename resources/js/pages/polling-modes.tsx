@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePoll } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     reset,
@@ -19,6 +19,9 @@ export default function PollingModes({
     const [keepAlive, setKeepAlive] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
     const { telemetry, reset: resetTelemetry } = useTelemetry();
+
+    // Re-fetch the page every second so the UI keeps up with the server.
+    usePoll(1000);
 
     const changeMode = (value: Mode) => {
         setMode(value);
